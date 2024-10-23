@@ -9,14 +9,22 @@ from threading import Timer
 import subprocess
 import platform
 from importlib_metadata import version
-
+import signal
 from bottle import Bottle, run, template, static_file, request, response, BaseRequest, default_app
-from .indi_server import IndiServer, INDI_PORT, INDI_FIFO, INDI_CONFIG_DIR
-from .driver import DeviceDriver, DriverCollection, INDI_DATA_DIR
-from .database import Database
-from .device import Device
-from .indihub_agent import IndiHubAgent
+from indi_server import IndiServer, INDI_PORT, INDI_FIFO, INDI_CONFIG_DIR
+from driver import DeviceDriver, DriverCollection, INDI_DATA_DIR
+from database import Database
+from device import Device
+from indihub_agent import IndiHubAgent
 
+from subprocess import check_output
+def get_pid():
+    return check_output(["pidof", "indiserver"])
+try:
+    previous = get_pid()
+    os.kill(int(previous.decode().replace('\n','')), signal.SIGTERM)
+except Exception :
+    pass
 # default settings
 WEB_HOST = '0.0.0.0'
 WEB_PORT = 8624
@@ -24,9 +32,8 @@ WEB_PORT = 8624
 # Make it 10MB
 BaseRequest.MEMFILE_MAX = 50 * 1024 * 1024
 
-pkg_path, _ = os.path.split(os.path.abspath(__file__))
+pkg_path = os.path.relpath(os.path.dirname(__file__))
 views_path = os.path.join(pkg_path, 'views')
-
 parser = argparse.ArgumentParser(
     description='INDI Web Manager. '
     'A simple web application to manage an INDI server')
@@ -320,7 +327,11 @@ def get_json_drivers():
 @app.post('/api/drivers/start/<label>')
 def start_driver(label):
     """Start INDI driver"""
+    logging.debug(f'Ask to start Driver {label}.' )
     driver = collection.by_label(label)
+    if driver is None:
+        logging.critical(f'Non existent driver {label} in driver list')
+        return
     indi_server.start_driver(driver)
     logging.info('Driver "%s" started.' % label)
 
@@ -335,6 +346,9 @@ def start_remote_driver(label):
 def stop_driver(label):
     """Stop INDI driver"""
     driver = collection.by_label(label)
+    if driver is None:
+        logging.critical(f'Non existent driver {label} in driver list')
+        return
     indi_server.stop_driver(driver)
     logging.info('Driver "%s" stopped.' % label)
 
@@ -350,6 +364,9 @@ def stop_remote_driver(label):
 def restart_driver(label):
     """Restart INDI driver"""
     driver = collection.by_label(label)
+    if driver is None:
+        logging.critical(f'Non existent driver {label} in driver list')
+        return
     indi_server.stop_driver(driver)
     indi_server.start_driver(driver)
     logging.info('Driver "%s" restarted.' % label)

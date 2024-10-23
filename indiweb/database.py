@@ -2,7 +2,7 @@ import os
 import errno
 import sqlite3
 import logging
-from . import __version__
+from __init__ import __version__
 
 
 def dict_factory(cursor, row):
@@ -20,7 +20,7 @@ class Database(object):
             os.makedirs(db_dir)
         except OSError as e:
             if e.errno != errno.EEXIST:
-                raise
+                raise e
         else:
             logging.info("Created directory %s" % db_dir)
 
@@ -146,6 +146,8 @@ class Database(object):
             self.__conn.commit()
         except sqlite3.IntegrityError:
             logging.warning("Profile name %s already exists.", name)
+            self.delete_profile(name)
+            self.add_profile(name)
         return c.lastrowid
 
     def get_profile(self, name):

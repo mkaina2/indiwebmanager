@@ -5,7 +5,7 @@ from subprocess import call, check_output
 import threading
 
 # Local imports
-from .AsyncSystemCommand import AsyncSystemCommand
+from AsyncSystemCommand import AsyncSystemCommand
 
 INDI_PORT = 7624
 INDI_FIFO = '/tmp/indiFIFO'
@@ -33,11 +33,12 @@ class IndiServer(object):
         logging.info(cmd)
         self.__async_cmd = AsyncSystemCommand(cmd)
         # Run the command asynchronously
-        self.__command_thread = threading.Thread(target=self.__async_cmd.run)
+        self.__command_thread = threading.Thread(target=self.__async_cmd.run, daemon=True)
         self.__command_thread.start()
 
     def start_driver(self, driver):
         # escape quotes if they exist
+        logging.debug(f"try to start driver {driver.name}")
         cmd = 'start %s' % driver.binary
 
         if driver.skeleton:
@@ -72,6 +73,9 @@ class IndiServer(object):
         self.__running_drivers = {}
 
         for driver in drivers:
+            if driver is None:
+                logging.critical(f'Non existent driver {driver} in driver list')
+                continue
             self.start_driver(driver)
 
     def stop(self):
