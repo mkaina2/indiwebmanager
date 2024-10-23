@@ -4,7 +4,7 @@ import os
 import threading
 
 # local
-from AsyncSystemCommand import AsyncSystemCommand
+from .AsyncSystemCommand import AsyncSystemCommand
 
 INDIHUB_AGENT_OFF = 'off'
 INDIHUB_AGENT_DEFAULT_MODE = 'solo'

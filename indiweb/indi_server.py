@@ -5,7 +5,7 @@ from subprocess import call, check_output
 import threading
 
 # Local imports
-from AsyncSystemCommand import AsyncSystemCommand
+from .AsyncSystemCommand import AsyncSystemCommand
 
 INDI_PORT = 7624
 INDI_FIFO = '/tmp/indiFIFO'

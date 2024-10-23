@@ -11,11 +11,11 @@ import platform
 from importlib_metadata import version
 import signal
 from bottle import Bottle, run, template, static_file, request, response, BaseRequest, default_app
-from indi_server import IndiServer, INDI_PORT, INDI_FIFO, INDI_CONFIG_DIR
-from driver import DeviceDriver, DriverCollection, INDI_DATA_DIR
-from database import Database
-from device import Device
-from indihub_agent import IndiHubAgent
+from .indi_server import IndiServer, INDI_PORT, INDI_FIFO, INDI_CONFIG_DIR
+from .driver import DeviceDriver, DriverCollection, INDI_DATA_DIR
+from .database import Database
+from .device import Device
+from .indihub_agent import IndiHubAgent
 
 from subprocess import check_output
 def get_pid():

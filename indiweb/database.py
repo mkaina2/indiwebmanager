@@ -2,7 +2,7 @@ import os
 import errno
 import sqlite3
 import logging
-from __init__ import __version__
+from . import __version__
 
 
 def dict_factory(cursor, row):
